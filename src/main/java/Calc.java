@@ -16,13 +16,19 @@ public class Calc {
         //green 3
         //return 4
 
-        //green 1280
+        //green 4
+        //return 1280
+
+        //green 5
+        //return 1
 
 
         //blue1
         //blue2
         //blue3
         //blue4
+        //blue5
+
         StringTokenizer st = new StringTokenizer(mathExpression);
 
         int operandHead = INT_MEANINGLESS;
