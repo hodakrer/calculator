@@ -7,10 +7,15 @@ public class Calc {
     static int answer = INT_MEANINGLESS;
 
     static public int run(String mathExpression){
-        //green
+        //green 1
         //return 2;
 
-        //blue
+        //green 2
+        //return 3;
+
+
+        //blue1
+        //blue2
         StringTokenizer st = new StringTokenizer(mathExpression);
 
         int operandHead = INT_MEANINGLESS;
