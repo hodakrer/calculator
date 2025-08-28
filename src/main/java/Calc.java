@@ -2,57 +2,72 @@
 
 public class Calc {
 
-    static final int INT_MEANINGLESS = Integer.MIN_VALUE;
-    static final String STRING_MEANINGLESS = "";
-    static int answer = INT_MEANINGLESS;
+    static int pos;        // 현재 처리 위치
+    static String input;   // 입력 수식
 
-    static public int run(String expression) {
-        expression = expression.replaceAll("\\s+", "");
-        return evalute(expression);
+    public static int run(String s) {
+        input = s.replaceAll("\\s+", ""); // 공백 제거
+        pos = 0;
+        return parseExpression();
     }
 
-    private static int evalute(String expression) {
-        return parseAddSubtract(expression);
-    }
-
-    // 덧셈/뺄셈 처리
-    private static int parseAddSubtract(String expr) {
-        int index = findLowestPrecedenceOperator(expr, '+', '-');
-        if (index != -1) {
-            char op = expr.charAt(index);
-            int left = parseAddSubtract(expr.substring(0, index));
-            int right = parseMultiplyDivide(expr.substring(index + 1));
-            return op == '+' ? left + right : left - right;
+    // 더하기, 빼기 처리
+    private static int parseExpression() {
+        int value = parseTerm();
+        while (pos < input.length()) {
+            char op = input.charAt(pos);
+            if (op == '+') {
+                pos++;
+                value += parseTerm();
+            } else if (op == '-') {
+                pos++;
+                value -= parseTerm();
+            } else {
+                break;
+            }
         }
-        return parseMultiplyDivide(expr);
+        return value;
     }
 
-    // 곱셈/나눗셈 처리
-    private static int parseMultiplyDivide(String expr) {
-        int index = findLowestPrecedenceOperator(expr, '*', '/');
-        if (index != -1) {
-            char op = expr.charAt(index);
-            int left = parseMultiplyDivide(expr.substring(0, index));
-            int right = parseNumber(expr.substring(index + 1));
-            return op == '*' ? left * right : left / right;
+    // 곱하기, 나누기 처리
+    private static int parseTerm() {
+        int value = parseFactor();
+        while (pos < input.length()) {
+            char op = input.charAt(pos);
+            if (op == '*') {
+                pos++;
+                value *= parseFactor();
+            } else if (op == '/') {
+                pos++;
+                value /= parseFactor();
+            } else {
+                break;
+            }
         }
-        return parseNumber(expr);
+        return value;
     }
 
-    // 숫자 처리
-    private static int parseNumber(String expr) {
-        if (expr.isEmpty()) throw new IllegalArgumentException("잘못된 수식");
-        return Integer.parseInt(expr);
-    }
-
-    // 연산자 우선순위 낮은 것 찾기 (오른쪽부터)
-    private static int findLowestPrecedenceOperator(String expr, char op1, char op2) {
-        for (int i = expr.length() - 1; i >= 0; i--) {
-            char c = expr.charAt(i);
-            if (c == op1 || c == op2) return i;
+    // 숫자와 부호 처리
+    private static int parseFactor() {
+        boolean negative = false;
+        if (pos < input.length() && input.charAt(pos) == '-') {
+            negative = true;
+            pos++;
+        } else if (pos < input.length() && input.charAt(pos) == '+') {
+            pos++;
         }
-        return -1;
+
+        int start = pos;
+        while (pos < input.length() && Character.isDigit(input.charAt(pos))) {
+            pos++;
+        }
+        int value = Integer.parseInt(input.substring(start, pos));
+        return negative ? -value : value;
     }
 
-
+    public static void main(String[] args) {
+        System.out.println(Calc.run("10 * -10")); // -100
+        System.out.println(Calc.run("10 + 20 - 5")); // 25
+        System.out.println(Calc.run("-5 * -3")); // 15
+    }
 }
