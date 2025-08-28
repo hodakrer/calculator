@@ -1,4 +1,4 @@
-import java.util.StringTokenizer;
+
 
 public class Calc {
 
@@ -6,106 +6,53 @@ public class Calc {
     static final String STRING_MEANINGLESS = "";
     static int answer = INT_MEANINGLESS;
 
-    static public int run(String mathExpression){
-        //green 1
-        //return 2;
-
-        //green 2
-        //return 3;
-
-        //green 3
-        //return 4
-
-        //green 4
-        //return 1280
-
-        //green 5
-        //return 1
-
-        //green 6
-        //return 2
-
-        //green 7
-        //return 80
-
-        //green 8
-        //return 60
-
-        //green 9
-        //return 20
-
-        //blue1
-        //blue2
-        //blue3
-        //blue4
-        //blue5
-        //blue6
-        //blue7
-        //blue8
-        //blue9
-        StringTokenizer st = new StringTokenizer(mathExpression);
-
-        int operandHead = INT_MEANINGLESS;
-        int operandMiddle = INT_MEANINGLESS;
-        int operandTail = INT_MEANINGLESS;
-
-        String operatorHead = STRING_MEANINGLESS;
-        String operatorTail = STRING_MEANINGLESS;
-        if (st.hasMoreTokens()) {
-            operandHead = Integer.parseInt(st.nextToken());
-        }
-
-        if (st.hasMoreTokens()) {
-            operatorHead = st.nextToken();  // 연산자
-        }
-
-        if (st.hasMoreTokens()) {
-            operandMiddle = Integer.parseInt(st.nextToken());
-        }
-
-        if (st.hasMoreTokens()) {
-            operatorTail = st.nextToken();
-        }
-
-        if (st.hasMoreTokens()) {
-            operandTail = Integer.parseInt(st.nextToken());
-        }
-
-        if(operatorTail.equals(STRING_MEANINGLESS)){
-            switch (operatorHead) {
-                case "+": return operandHead + operandMiddle;
-                case "-": return operandHead - operandMiddle;
-                case "*": return operandHead * operandMiddle;
-                case "/": return operandHead / operandMiddle;
-                default: throw new IllegalArgumentException("지원하지 않는 연산자입니다.");
-            }
-
-        }else{//two operator
-            if(operatorTail.equals("+")){
-                switch (operatorHead) {
-                    case "+": return operandHead + operandMiddle + operandTail;
-                    case "-": return operandHead - operandMiddle + operandTail;
-                    case "*": return operandHead * operandMiddle + operandTail;
-                }
-            }
-            else if(operatorTail.equals("-")){
-                switch (operatorHead) {
-                    case "+": return operandHead + operandMiddle - operandTail;
-                    case "-": return operandHead - operandMiddle - operandTail;
-                    case "*": return operandHead * operandMiddle - operandTail;
-                }
-            }
-            else if(operatorTail.equals("*")){
-                switch (operatorHead) {
-                    case "+": return operandHead + operandMiddle * operandTail;
-                    case "-": return operandHead - operandMiddle * operandTail;
-                    case "*": return operandHead * operandMiddle * operandTail;
-                }
-            }
-            else return INT_MEANINGLESS;
-        }
-
-
-        return INT_MEANINGLESS;
+    static public int run(String expression) {
+        expression = expression.replaceAll("\\s+", "");
+        return evalute(expression);
     }
+
+    private static int evalute(String expression) {
+        return parseAddSubtract(expression);
+    }
+
+    // 덧셈/뺄셈 처리
+    private static int parseAddSubtract(String expr) {
+        int index = findLowestPrecedenceOperator(expr, '+', '-');
+        if (index != -1) {
+            char op = expr.charAt(index);
+            int left = parseAddSubtract(expr.substring(0, index));
+            int right = parseMultiplyDivide(expr.substring(index + 1));
+            return op == '+' ? left + right : left - right;
+        }
+        return parseMultiplyDivide(expr);
+    }
+
+    // 곱셈/나눗셈 처리
+    private static int parseMultiplyDivide(String expr) {
+        int index = findLowestPrecedenceOperator(expr, '*', '/');
+        if (index != -1) {
+            char op = expr.charAt(index);
+            int left = parseMultiplyDivide(expr.substring(0, index));
+            int right = parseNumber(expr.substring(index + 1));
+            return op == '*' ? left * right : left / right;
+        }
+        return parseNumber(expr);
+    }
+
+    // 숫자 처리
+    private static int parseNumber(String expr) {
+        if (expr.isEmpty()) throw new IllegalArgumentException("잘못된 수식");
+        return Integer.parseInt(expr);
+    }
+
+    // 연산자 우선순위 낮은 것 찾기 (오른쪽부터)
+    private static int findLowestPrecedenceOperator(String expr, char op1, char op2) {
+        for (int i = expr.length() - 1; i >= 0; i--) {
+            char c = expr.charAt(i);
+            if (c == op1 || c == op2) return i;
+        }
+        return -1;
+    }
+
+
 }
